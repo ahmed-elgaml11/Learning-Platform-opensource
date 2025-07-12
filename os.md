@@ -20,81 +20,83 @@ ___
 
 
 
+| Method   | Endpoint                                                                               | Description                            | Response status                     |
+| -------- | -------------------------------------------------------------------------------------- | -------------------------------------- | ----------------------------------- |
+| `POST`   | `/api/v1/tracks/:trackId/levels/:levelId/courses/:courseId/topics/:topicId/completion` | Mark a topic as completed by a user    | `201 Created`                       |
+| `GET`    | `/api/v1/tracks/:trackId/levels/:levelId/courses/:courseId/completion`                 | Get completed topic IDs for a course   | `200 OK`                            |
+| `GET`    | `/api/v1/tracks/:trackId/levels/:levelId/courses/:courseId/topics/:topicId/completion` | Check if a specific topic is completed | `200 OK`                            |
+| `DELETE` | `/api/v1/tracks/:trackId/levels/:levelId/courses/:courseId/topics/:topicId/completion` | Unmark a topic as completed            | `204 No Content` |
 
 
+### ✅ `POST` — Mark Topic as Completed
 
-| Method   | Endpoint                                                                               | Description                                                 | Response Body                                                                                                                                         |
-| -------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `POST`   | `/api/v1/tracks/:trackId/levels/:levelId/courses/:courseId/topics/:topicId/completion` | Mark a topic as completed by a user                         | `201 Created`<br>`{ "message": "Topic marked as completed", "data": { "userId": "...", "topicId": "...", "courseId": "...", "completedAt": "..." } }` |
-| `GET`    | `/api/v1/tracks/:trackId/levels/:levelId/courses/:courseId/completion`                 | Returns a list of completed topic IDs for the learner for specific course       | `200 OK`<br>`{ "courseId": "...", "completedTopics": [ { "topicId": "...", "completedAt": "..." }, ... ] }`                                           |
-| `GET`    | `/api/v1/tracks/:trackId/levels/:levelId/courses/:courseId/topics/:topicId/completion` | Get completion status (completed or not) for specific topic | `200 OK`<br>`{ "Completed": true/false, "completedAt": "..."/ null      
-}`                                                      |
-| `DELETE` | `/api/v1/tracks/:trackId/levels/:levelId/courses/:courseId/topics/:topicId/completion` | Unmark a topic as completed                                 | `204 NO Content`             |
+<details>
+<summary>Response Body</summary>
 
 
+``` json
+{
+  "message": "Topic marked as completed",
+  "data": {
+    "userId": "",
+    "topicId": "",
+    "courseId": "",
+    "trackId": "",
+    "levelId": "",
+    "completedAt": ""
+  }
+}
+```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-| Method   | Endpoint                                                                               | Description                                                   | Response Body                                                                                                                                                                                                 |
-| -------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `POST`   | `/api/v1/tracks/:trackId/levels/:levelId/courses/:courseId/topics/:topicId/completion` | Mark a topic as completed by a user                           | **201 Created**<br>`json<br>{<br>  "message": "Topic marked as completed",<br>  "data": {<br>    "userId": "...",<br>    "topicId": "...",<br>    "courseId": "...",<br>    "completedAt": "..."<br>  }<br>}` |
-| `GET`    | `/api/v1/tracks/:trackId/levels/:levelId/courses/:courseId/completion`                 | Get all completed topics for the learner within a course      | **200 OK**<br>`json<br>{<br>  "courseId": "...",<br>  "completedTopics": [<br>    { "topicId": "...", "completedAt": "..." },<br>    ...<br>  ]<br>}`                                                         |
-| `GET`    | `/api/v1/tracks/:trackId/levels/:levelId/courses/:courseId/topics/:topicId/completion` | Get completion status (completed or not) for a specific topic | **200 OK**<br>`json<br>{<br>  "completed": true,<br>  "completedAt": "..."<br>}`<br>or<br>`json<br>{<br>  "completed": false<br>}`                                                                            |
-| `DELETE` | `/api/v1/tracks/:trackId/levels/:levelId/courses/:courseId/topics/:topicId/completion` | Unmark a topic as completed                                   | **204 No Content** (no response body on success)<br>or<br>**404 Not Found**<br>`json<br>{<br>  "message": "Topic was not marked as completed"<br>}`                                                           |
+</details>
 
 
 
 
+### ✅ `GET` — Get Completed Topics in a Course
+
+<details>
+<summary>Response Body</summary>
 
 
+``` json
+{
+  "courseId": "",
+  "completedTopics": [
+    { "topicId": "", "completedAt": "" },
+    { "topicId": "", "completedAt": "" }
+  ]
+}
+```
 
-
-
-
-
-
-
-
+</details>
 
 
 
 
 
 
+### ✅ `GET` — Check Topic Completion Status
+
+<details>
+<summary>Response Body</summary>
 
 
-| Method   | Endpoint                                                                                   | Description                                                   | Response Body |
-|----------|--------------------------------------------------------------------------------------------|---------------------------------------------------------------|---------------|
-| `POST`   | `/api/v1/tracks/:trackId/levels/:levelId/courses/:courseId/topics/:topicId/completion`     | Mark a topic as completed by a user                           | **201 Created**<br>```json<br>{<br>  "message": "Topic marked as completed",<br>  "data": {<br>    "userId": "...",<br>    "topicId": "...",<br>    "courseId": "...",<br>    "completedAt": "..."<br>  }<br>}``` |
-| `GET`    | `/api/v1/tracks/:trackId/levels/:levelId/courses/:courseId/completion`                     | Get all completed topics for the learner within a course      | **200 OK**<br>```json<br>{<br>  "courseId": "...",<br>  "completedTopics": [<br>    { "topicId": "...", "completedAt": "..." },<br>    ...<br>  ]<br>}``` |
-| `GET`    | `/api/v1/tracks/:trackId/levels/:levelId/courses/:courseId/topics/:topicId/completion`     | Get completion status (completed or not) for a specific topic | **200 OK**<br>```json<br>{<br>  "completed": true,<br>  "completedAt": "..."<br>}```<br>or<br>```json<br>{<br>  "completed": false<br>}``` |
-| `DELETE` | `/api/v1/tracks/:trackId/levels/:levelId/courses/:courseId/topics/:topicId/completion`     | Unmark a topic as completed                                   | **204 No Content** (no response body)<br>or<br>**404 Not Found**<br>```json<br>{<br>  "message": "Topic was not marked as completed"<br>}``` |
+``` json
+{
+  "completed": true,
+  "completedAt": "2025-07-12T01:30:00Z"
+}
+or
+{
+  "completed": false
+}
+
+```
+
+</details>
 
 
 
 
-| Method   | Endpoint                                                                                   | Description                                                   | Response Body |
-|----------|--------------------------------------------------------------------------------------------|---------------------------------------------------------------|---------------|
-| `POST`   | `/api/v1/tracks/:trackId/levels/:levelId/courses/:courseId/topics/:topicId/completion`     | Mark a topic as completed by a user                           | **201 Created**<br>```json\n{\n  "message": "Topic marked as completed",\n  "data": {\n    "userId": "...",\n    "topicId": "...",\n    "courseId": "...",\n    "completedAt": "..." \n  }\n}``` |
-| `GET`    | `/api/v1/tracks/:trackId/levels/:levelId/courses/:courseId/completion`                     | Get all completed topics for the learner within a course      | **200 OK**<br>```json\n{\n  "courseId": "...",\n  "completedTopics": [\n    { "topicId": "...", "completedAt": "..." },\n    ...\n  ]\n}``` |
-| `GET`    | `/api/v1/tracks/:trackId/levels/:levelId/courses/:courseId/topics/:topicId/completion`     | Get completion status (completed or not) for a specific topic | **200 OK**<br>```json\n{\n  "completed": true,\n  "completedAt": "..." \n}```<br>or<br>```json\n{\n  "completed": false \n}``` |
-| `DELETE` | `/api/v1/tracks/:trackId/levels/:levelId/courses/:courseId/topics/:topicId/completion`     | Unmark a topic as completed                                   | **204 No Content**<br>or<br>**404 Not Found**<br>```json\n{\n  "message": "Topic was not marked as completed"\n}``` |
+</details>
