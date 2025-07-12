@@ -7,12 +7,12 @@
 
 #### data definition: 
 
-consept of somebody completing some content which can be an object with id, num of items, timeline, userid,..
+consept of somebody completing some topic which can be an object with id, title, content, expected duration
 and finally we can map it into db. 
 ___
 
 
-### once of defining the data we should define endpoints 
+### once of defining the data we should define endpoints:
 
 
 
@@ -40,9 +40,8 @@ ___
   "data": {
     "userId": "",
     "topicId": "",
+    "topicTitle": "",
     "courseId": "",
-    "trackId": "",
-    "levelId": "",
     "completedAt": ""
   }
 }
