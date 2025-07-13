@@ -22,13 +22,38 @@ ___
 
 | Method   | Endpoint                                                                               | Description                            | Response status                     |
 | -------- | -------------------------------------------------------------------------------------- | -------------------------------------- | ----------------------------------- |
-| `POST`   | `/api/v1/tracks/:trackId/levels/:levelId/courses/:courseId/topics/:topicId/completion` | Mark a topic as completed by a user    | `201 Created`                       |
-| `GET`    | `/api/v1/tracks/:trackId/levels/:levelId/courses/:courseId/completion`                 | Get completed topic IDs for a course   | `200 OK`                            |
-| `GET`    | `/api/v1/tracks/:trackId/levels/:levelId/courses/:courseId/topics/:topicId/completion` | Check if a specific topic is completed | `200 OK`                            |
-| `DELETE` | `/api/v1/tracks/:trackId/levels/:levelId/courses/:courseId/topics/:topicId/completion` | Unmark a topic as completed            | `204 No Content` |
+| `Post`   | `/api/v1/roadmaps/:roadmapId/courses/:courseId/topics/:topicId/completion` | Mark a topic as completed by a user    | `201 Created`                       |
+| `GET`    | `/api/v1/roadmaps/:roadmapId/courses/:courseId/completion`                 | Get completed topics for a course   | `200 OK`                            |
+| `GET`    | `/api/v1/roadmaps/:roadmapId/courses/:courseId/completion/progress` | To provide insights (completion percentage for a course) | `200 OK`                            |
+| `DELETE` | `/api/v1/roadmaps/:roadmapId/courses/:courseId/topics/:topicId/completion` | Unmark a topic as completed            | `204 No Content` |
 
 
+___
+
+### DataBase queries and responses body
 ### ✅ `POST` — Mark Topic as Completed
+<details>
+<summary>Query</summary>
+
+
+``` js
+const { courseId, topicId } = req.params;
+const userId = req.user.id;
+
+  await prisma.UserCompletion.create({
+    data: {
+      userId,
+      topicId,
+      completedAt: Date.now(),
+    },
+  });
+
+and basic query to get the the topicTitle
+
+```
+
+</details>
+
 
 <details>
 <summary>Response Body</summary>
@@ -52,7 +77,49 @@ ___
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ### ✅ `GET` — Get Completed Topics in a Course
+
+<details>
+<summary>Query</summary>
+
+
+``` js
+const courseId = req.params.courseId
+const userId = req.user.id
+
+const completedTopics = await prisma.UserCompletion.findMany({
+  where: {
+    userId,
+    topic: {
+      courseId,
+    },
+  },
+  include: {
+    topic: true,
+  },
+});
+
+```
+
+</details>
 
 <details>
 <summary>Response Body</summary>
@@ -75,7 +142,58 @@ ___
 
 
 
-### ✅ `GET` — Check Topic Completion Status
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### ✅ `GET` — Check Course Completion Status (completion percentage for a course)
+
+<details>
+<summary>Query</summary>
+
+
+``` js
+const courseId = req.params.courseId
+const userId = req.user.id
+
+const totalTopics = await prisma.Topic.findMany({
+  where: {
+    courseId,
+  },
+});
+
+const completedTopics = await prisma.UserCompletion.findMany({
+  where: {
+    userId,
+    topic: {
+      courseId,
+    },
+  },
+  include: {
+    topic: true,
+  },
+});
+
+const percent = (completedTopics.length / totalTopics.length) * 100;
+
+```
+
+</details>
+
+
 
 <details>
 <summary>Response Body</summary>
@@ -83,13 +201,49 @@ ___
 
 ``` json
 {
-  "completed": true,
-  "completedAt": "2025-07-12T01:30:00Z"
+  "percentage of completion": '',
 }
-or
-{
-  "completed": false
-}
+```
+
+</details>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### ✅ `DELETE` — Unmark a topic as completed
+
+
+
+<details>
+<summary>Query</summary>
+
+
+``` js
+const topicId = req.params.topicId
+const userId = req.user.id
+await prisma.UserCompletion.deleteOne({
+    where: {
+      userId,
+      topicId
+    }
+})
 
 ```
 
@@ -98,4 +252,91 @@ or
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Basic Operations:
+
+used to get all topics
+`  /api/v1/roadmaps/:roadmapId/courses/:courseId/topics
+`
+<details>
+<summary>Query</summary>
+
+  ``` js
+const courseId = req.params.courseId
+const userId = req.user.id
+const topics = await prisma.Topic.findMany({
+    where: {
+      courseId
+    }
+})
+```
 </details>
+
+
+
+
+
+
+___
+used to get specific topic 
+`/api/v1/roadmaps/:roadmapId/courses/:courseId/topics/:topicId `        
+
+
+<details>
+<summary>Query</summary>
+
+  ``` js
+const topicId = req.params.topicId
+const userId = req.user.id
+const topics = await prisma.Topic.findMany({
+    where: {
+      id: topicId
+    }
+})
+```
+
+
+</details>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
