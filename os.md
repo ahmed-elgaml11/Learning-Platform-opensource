@@ -1,211 +1,98 @@
-###  one of the main steps to system design a feature is to reduce the feature into data definition 
+#  API Specification
+
+##  one of the main steps to system design a feature is to reduce the feature into data definition 
 
 
-#### Feature: 
+### Feature: 
 
    Allow the user to mark content as completed after finishing it.
 
-#### data definition: 
+### data definition: 
 
-consept of somebody completing some topic which can be an object with id, title, content, expected duration
+- we have many tracks each one has many courses each one has many topics 
+-  consept of somebody completing some topic which can be an object with id, title, content, expected duration
 and finally we can map it into db. 
-___
-
-
-### once of defining the data we should define endpoints:
-
-
-
-
-
-
-
-| Method   | Endpoint                                                                               | Description                            | Response status                     |
-| -------- | -------------------------------------------------------------------------------------- | -------------------------------------- | ----------------------------------- |
-| `Post`   | `/api/v1/roadmaps/:roadmapId/courses/:courseId/topics/:topicId/completion` | Mark a topic as completed by a user    | `201 Created`                       |
-| `GET`    | `/api/v1/roadmaps/:roadmapId/courses/:courseId/completion`                 | Get completed topics for a course   | `200 OK`                            |
-| `GET`    | `/api/v1/roadmaps/:roadmapId/courses/:courseId/completion/progress` | To provide insights (completion percentage for a course) | `200 OK`                            |
-| `DELETE` | `/api/v1/roadmaps/:roadmapId/courses/:courseId/topics/:topicId/completion` | Unmark a topic as completed            | `204 No Content` |
-
 
 ___
 
-### DataBase queries and responses body
-### ✅ `POST` — Mark Topic as Completed
-<details>
-<summary>Query</summary>
+
+## once of defining the data we should define endpoints:
 
 
-``` js
-const { courseId, topicId } = req.params;
-const userId = req.user.id;
 
-  await prisma.UserCompletion.create({
-    data: {
-      userId,
-      topicId,
-      completedAt: Date.now(),
-    },
-  });
 
-and basic query to get the the topicTitle
+## 📘 Track Endpoints
 
+### ✅ GET `/tracks`
+
+- **Description:** Retrieves all available tracks.
+- **Response:** `200 OK` with a list of tracks.
+
+**Query Example:**
+```ts
+const tracks = await prisma.track.findMany();
 ```
-
-</details>
-
-
-<details>
-<summary>Response Body</summary>
-
-
+**Response Body:**
 ``` json
 {
-  "message": "Topic marked as completed",
-  "data": {
-    "userId": "",
-    "topicId": "",
-    "topicTitle": "",
-    "courseId": "",
-    "completedAt": ""
-  }
-}
-```
-
-</details>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### ✅ `GET` — Get Completed Topics in a Course
-
-<details>
-<summary>Query</summary>
-
-
-``` js
-const courseId = req.params.courseId
-const userId = req.user.id
-
-const completedTopics = await prisma.UserCompletion.findMany({
-  where: {
-    userId,
-    topic: {
-      courseId,
-    },
-  },
-  include: {
-    topic: true,
-  },
-});
-
-```
-
-</details>
-
-<details>
-<summary>Response Body</summary>
-
-
-``` json
-{
-  "courseId": "",
-  "completedTopics": [
-    { "topicId": "", "completedAt": "" },
-    { "topicId": "", "completedAt": "" }
+  lenghth: tracks.length
+  tracks: [
+    {
+      id,
+      title,
+      description
+    }
   ]
+
+  
 }
 ```
 
-</details>
 
+### ✅ GET `/tracks/:trackId `
 
+- **Description:** Retrieve a specific track by ID and all courses in this track.
+- **Response:** `200 OK` with a single track and a list of all track courses.
 
+**Query Example:**
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### ✅ `GET` — Check Course Completion Status (completion percentage for a course)
-
-<details>
-<summary>Query</summary>
-
-
-``` js
-const courseId = req.params.courseId
-const userId = req.user.id
-
-const totalTopics = await prisma.Topic.findMany({
+```ts
+const track = await prisma.track.findUnique({
   where: {
-    courseId,
-  },
+    id: req.params.trackId
+  }
 });
 
-const completedTopics = await prisma.UserCompletion.findMany({
+const courses = await prisma.course.findMnay({
   where: {
-    userId,
-    topic: {
-      courseId,
-    },
+    trackId: req.params.trackId
   },
-  include: {
-    topic: true,
-  },
-});
-
-const percent = (completedTopics.length / totalTopics.length) * 100;
-
+  orderBy: {
+    order: 'asc'
+  }
+})
 ```
-
-</details>
-
-
-
-<details>
-<summary>Response Body</summary>
-
+**Response Body:**
 
 ``` json
+
 {
-  "percentage of completion": '',
+  track: [
+    {
+      id,
+      title,
+      description
+    }
+  ],
+  courses: [
+    {
+      title
+    }
+  ]
+  
 }
 ```
 
-</details>
 
 
 
@@ -214,108 +101,117 @@ const percent = (completedTopics.length / totalTopics.length) * 100;
 
 
 
+## 📘 Course Endpoints
 
 
+### ✅ GET `/courses/:courseId `
 
+- **Description:** Retrieve a specific Course by ID and all topics in this course and completion percentage for a course .
+- **Response:** `200 OK` with a single Course and alist of course topics and completion percentage for a course .
+ **Query Example:**
 
+```ts
+const course = await prisma.course.findUnique({
+  where: {
+    id: req.params.courseId
+  }
+});
 
-
-
-
-
-
-
-
-
-### ✅ `DELETE` — Unmark a topic as completed
-
-
-
-<details>
-<summary>Query</summary>
-
-
-``` js
-const topicId = req.params.topicId
-const userId = req.user.id
-await prisma.UserCompletion.deleteOne({
-    where: {
-      userId,
-      topicId
-    }
+const totalTopics = await prisma.topic.findMnay({
+  where: {
+    courseId: req.params.courseId
+  },
+  orderBy: {
+    order: 'asc'
+  }
 })
+
+
+const completedTopics = await prisma.userCompletion.findMany({
+  where: {
+    userId: req.user.id,
+    topic: {
+      courseId: req.params.courseId
+    }
+
+  },
+  select: {
+    topic: true
+  }
+
+})
+const persentage = (completedTopics.length/ totalTopics.length) * 100
+```
+
+**Response Body:**
+``` json 
+  course:{
+    title, 
+    description
+  },
+  totalToics: {
+    title
+  },
+  persentage
 
 ```
 
-</details>
 
 
 
 
+### ✅ GET `/courses/:courseId/topics `
 
+- **Description:** get completed and uncompleted topics in the course .
+- **Response:** `200 OK` with a single Course and alist of course topics and completion percentage for a course .
+- **Query Example:**
 
+```ts
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## Basic Operations:
-
-used to get all topics
-`  /api/v1/roadmaps/:roadmapId/courses/:courseId/topics
-`
-<details>
-<summary>Query</summary>
-
-  ``` js
-const courseId = req.params.courseId
-const userId = req.user.id
-const topics = await prisma.Topic.findMany({
-    where: {
-      courseId
-    }
+const totalTopics = await prisma.topic.findMnay({
+  where: {
+    courseId: req.params.courseId
+  },
+  orderBy: {
+    order: 'asc'
+  }
 })
+
+const completedTopics = await prisma.userCompletion.findMany({
+  where: {
+    userId: req.user.id,
+    topic: {
+      courseId: req.params.courseId
+    }
+
+  },
+  select: {
+    topic: true
+  }
+})
+
+const completedTopicsIds = completedTopics.map(ele => ele.topic.id)
+const unCompletedTopics = await totalTopics.filter(ele => !completedTopicsIds.includes(ele.id) )
+
+
 ```
-</details>
 
+**Response Body:**
+``` json 
+  completedTopics:{
+    title, 
+    description,
+    duration
+  },
+  completedTopicsIds: {
+    title, 
+    description,
+    duration
+  },
 
-
-
-
-
-___
-used to get specific topic 
-`/api/v1/roadmaps/:roadmapId/courses/:courseId/topics/:topicId `        
-
-
-<details>
-<summary>Query</summary>
-
-  ``` js
-const topicId = req.params.topicId
-const userId = req.user.id
-const topics = await prisma.Topic.findMany({
-    where: {
-      id: topicId
-    }
-})
 ```
 
 
-</details>
 
 
 
@@ -325,18 +221,72 @@ const topics = await prisma.Topic.findMany({
 
 
 
+## 📘 Topic Endpoints
+
+
+
+### ✅ GET `/topics/:topicId `
+
+- **Description:** Retrieve a specific topic by ID .
+- **Response:** `200 OK` with a single topic.
+**Query Example:**
+
+```ts
+const topic = await prisma.topic.findUnique({
+  where: {
+    id: req.params.topicId
+  }
+});
+```
+
+**Response Body:**
+``` json 
+topic: {
+  title,
+  duration,
+  content
+}
+```
+
+
+
+### ✅ Post `/topics/:topicId/completion` 
+
+- **Description:** Mark a topic as completed by a user .
+- **Response:** `201 Created` with the completed topic.
+**Query Example:**
+
+```ts
+const topic = await prisma.userCompleteion.create({
+  data: {
+    userId: req.user.id,
+    topicId: req.params.topicId
+  }
+});
+```
+**Response Body:**
+``` json 
+topic: {
+  title,
+  duration,
+  content
+}
+```
 
 
 
 
+### ✅ Delete `/topics/:topicId/completion` 
 
+- **Description:** Unmark a topic as completed .
+- **Response:** ` 204 No Content`.
+**Query Example:**
 
-
-
-
-
-
-
-
-
-
+```ts
+const topic = await prisma.userCompleteion.delete({
+  where: {
+    userId: req.user.id,
+    topicId: req.params.topicId
+  }
+});
+```
